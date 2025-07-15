@@ -1,0 +1,11 @@
+{
+  "name": "CyberHud+",
+  "version": "8.09",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [{ "path": "firmware/firmwaretouch.bin", "offset": 0 }]
+    }
+  ]
+}

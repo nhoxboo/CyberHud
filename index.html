@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuỳ biến CyberHud</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tuỳ biến CyberHud</h1>
+            <div class="connection-status">
+                <span id="bleState">Chưa kết nối</span>
+                <div class="status-dot"></div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <button id="connectBleButton" class="button-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10-5 5V2l5 5L7 17"></path></svg>
+                Kết nối với CyberHud
+            </button>
+            <p id="unsupported-browser" class="error-message" style="display: none;">
+                Trình duyệt này không hỗ trợ Web Bluetooth. Vui lòng sử dụng Chrome trên máy tính hoặc Bluefy trên iOS.
+            </p>
+        </div>
+
+        <div id="configBlock" class="config-section" style="display: none;">
+            <div class="card">
+                <h2>Cài đặt hiển thị</h2>
+                <div class="form-group">
+                    <label for="display_rotation">Xoay màn hình</label>
+                    <select id="display_rotation" class="config-control">
+                        <option value="1">Cổng sạc bên phải</option>
+                        <option value="3">Cổng sạc bên trái</option>
+                        <option value="5">Ngược (cổng sạc phải)</option>
+                        <option value="7">Ngược (cổng sạc trái)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="night_brightness">Độ sáng màn hình (ban đêm)</label>
+                    <div class="slider-container">
+                        <input type="range" id="night_brightness" min="0" max="9" class="config-control">
+                        <span class="slider-value">5</span>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="led_brightness">Độ sáng LED cảnh báo</label>
+                    <div class="slider-container">
+                        <input type="range" id="led_brightness" min="0" max="9" class="config-control">
+                        <span class="slider-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Màn hình khởi động</h2>
+                <div class="form-group">
+                    <label for="boot_screen_duration">Thời gian hiển thị (giây, 0 = tắt)</label>
+                    <input type="number" id="boot_screen_duration" min="0" max="255" value="0" class="config-control">
+                </div>
+                <div class="form-group">
+                    <label>Tải ảnh khởi động (JPEG, 320x240)</label>
+                    <button id="transfer-file-button" class="button-secondary">Chọn & Tải lên</button>
+                    <div id="file-transfer-percent" class="progress-bar" style="display: none;">
+                        <div class="progress"></div>
+                        <span>0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Cảnh báo & Âm thanh</h2>
+                 <div class="form-group">
+                    <label for="speed_limit_offset">Cảnh báo tốc độ trễ (km/h)</label>
+                    <input type="number" id="speed_limit_offset" min="0" value="0" class="config-control">
+                </div>
+                <div class="form-group">
+                    <label for="beep_limit_change">Kêu 'bip' khi biển báo thay đổi</label>
+                    <select id="beep_limit_change" class="config-control">
+                        <option value="1">Có kêu</option>
+                        <option value="0">Không kêu</option>
+                    </select>
+                </div>
+            </div>
+
+             <div class="card">
+                <h2>Cài đặt khác</h2>
+                <div class="form-group">
+                    <label for="inactive_duration">Tự tắt màn khi mất kết nối</label>
+                    <select id="inactive_duration" class="config-control">
+                        <option value="1">Sau 1 phút</option>
+                        <option value="2">Sau 2 phút</option>
+                        <option value="3">Sau 3 phút</option>
+                        <option value="5">Sau 5 phút</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="show_image_holder">Hiện ảnh mờ khi không có biển báo</label>
+                    <select id="show_image_holder" class="config-control">
+                        <option value="1">Có hiện</option>
+                        <option value="0">Không hiện</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="obd_scan_duration">Kết nối đầu đọc OBD (vgate iCar Pro)</label>
+                    <select id="obd_scan_duration" class="config-control">
+                        <option value="0">Tắt</option>
+                        <option value="5">Bật (quét 5s)</option>
+                        <option value="10">Bật (quét 10s)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="footer-actions">
+                 <button id="sendButton" class="button-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2z"></path></svg>
+                    Gửi Cấu hình tới HUD
+                </button>
+                <span id="sendState" class="send-status"></span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

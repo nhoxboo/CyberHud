@@ -1,0 +1,183 @@
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa;
+    --text-color: #333;
+    --card-background: #ffffff;
+    --border-color: #dee2e6;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --connecting-color: #ffc107;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    transition: background-color 0.3s;
+}
+
+.status-dot.connected { background-color: var(--success-color); }
+.status-dot.connecting { background-color: var(--connecting-color); }
+.status-dot.disconnected { background-color: var(--error-color); }
+
+
+.main-content {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.button-primary, .button-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.button-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+.button-primary:hover {
+    background-color: #0056b3;
+}
+
+.button-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+.button-secondary:hover {
+    background-color: #5a6268;
+}
+
+.config-section {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+select, input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 16px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+}
+
+.progress-bar {
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    margin-top: 10px;
+    overflow: hidden;
+    position: relative;
+    height: 25px;
+}
+.progress-bar .progress {
+    width: 0%;
+    height: 100%;
+    background-color: var(--success-color);
+    transition: width 0.2s;
+}
+.progress-bar span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+    font-weight: 500;
+}
+
+
+.footer-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.send-status {
+    margin-left: 1rem;
+    font-weight: 500;
+    color: var(--success-color);
+}
+
+.error-message {
+    color: var(--error-color);
+    font-weight: 500;
+}
