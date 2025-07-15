@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliders = document.querySelectorAll('input[type="range"]');
     const configControls = document.querySelectorAll('.config-control');
 
+    const firmwareVersionEl = document.getElementById('firmwareVersion');
+    const updateNotificationEl = document.getElementById('update-notification');
+
     // --- BLE Constants ---
     const DEVICE_NAME = 'VIETMAP_HUD';
     const SERVICE_UUID = '0000fff0-0000-1000-8000-00805f9b34fb';
@@ -29,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let configCharacteristic;
     let fileBlockCharacteristic;
     let isConnected = false;
-    
+    const LATEST_FIRMWARE_VERSION = '8.11'; // Phiên bản mới nhất từ manifest_blue.json/green.json
+
     // --- UI Update Functions ---
     const setConnectionStatus = (status) => {
         bleStateContainer.textContent = status;
@@ -47,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusDot.classList.add('disconnected');
                 configBlock.style.display = 'none';
                 connectButton.style.display = 'inline-flex';
+                firmwareVersionEl.textContent = 'Chưa rõ';
+                updateNotificationEl.style.display = 'none';
                 break;
         }
     };
@@ -67,6 +73,42 @@ document.addEventListener('DOMContentLoaded', () => {
         isConnected = false;
         setConnectionStatus('Đã mất kết nối');
         console.log('Thiết bị đã mất kết nối');
+    };
+
+    /**
+     * Lấy phiên bản firmware và kiểm tra cập nhật
+     */
+    const getFirmwareVersion = async () => {
+        try {
+            console.log('Đang lấy Device Info Service...');
+            const infoService = await bleServer.getPrimaryService(DEVICE_INFO_SERVICE_UUID);
+            const firmwareChar = await infoService.getCharacteristic(FIRMWARE_CHAR_UUID);
+            
+            console.log('Đang đọc phiên bản Firmware...');
+            const value = await firmwareChar.readValue();
+            const decoder = new TextDecoder('utf-8');
+            const currentVersion = decoder.decode(value);
+            
+            console.log(`Phiên bản Firmware hiện tại: ${currentVersion}`);
+            firmwareVersionEl.textContent = currentVersion;
+            
+            // So sánh phiên bản
+            // Chuyển "8.11" thành 811, "8.9" thành 89 để so sánh số học
+            const currentVersionNum = parseInt(currentVersion.replace('.', ''));
+            const latestVersionNum = parseInt(LATEST_FIRMWARE_VERSION.replace('.', ''));
+
+            if (currentVersionNum < latestVersionNum) {
+                console.log('Có bản cập nhật mới!');
+                updateNotificationEl.style.display = 'block';
+            } else {
+                console.log('Đang dùng phiên bản mới nhất.');
+                updateNotificationEl.style.display = 'none';
+            }
+
+        } catch(error) {
+            console.error('Không thể đọc phiên bản firmware:', error);
+            firmwareVersionEl.textContent = 'Lỗi';
+        }
     };
 
     const connectDevice = async () => {
@@ -98,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fileBlockCharacteristic = await service.getCharacteristic(FILE_BLOCK_UUID);
             const notificationCharacteristic = await service.getCharacteristic(NOTIF_CHAR_UUID);
 
-            // Bắt đầu lắng nghe thông báo từ HUD
             await notificationCharacteristic.startNotifications();
             notificationCharacteristic.addEventListener('characteristicvaluechanged', handleNotifications);
             
@@ -106,9 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setConnectionStatus('Đã kết nối');
             console.log('Kết nối thành công!');
             
-            // >>> TÍNH NĂNG MỚI: Gửi yêu cầu để lấy cấu hình hiện tại từ HUD <<<
+            // Lấy phiên bản firmware và cấu hình
+            await getFirmwareVersion();
+            
             console.log('Đang yêu cầu cấu hình từ HUD...');
-            // Gửi một chuỗi đặc biệt, firmware của bạn cần nhận diện chuỗi này để gửi lại cấu hình
             const requestConfigCmd = new TextEncoder().encode('LOAD'); 
             await configCharacteristic.writeValueWithoutResponse(requestConfigCmd);
 
@@ -118,26 +160,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    /**
-     * Xử lý dữ liệu cấu hình nhận được từ HUD
-     * @param {Event} event Sự kiện chứa dữ liệu
-     */
     const handleNotifications = (event) => {
         const value = event.target.value;
         const decoder = new TextDecoder('utf-8');
         const configString = decoder.decode(value);
 
         console.log('Nhận được dữ liệu từ HUD:', configString);
-        // Chỉ xử lý nếu chuỗi nhận về là chuỗi cấu hình
         if (configString.includes(';')) {
             parseAndApplyConfig(configString);
         }
     };
 
-    /**
-     * Phân tích chuỗi cấu hình và cập nhật giao diện web
-     * @param {string} configString Chuỗi cấu hình từ HUD (vd: "BKHN;led_brightness=8;...")
-     */
     const parseAndApplyConfig = (configString) => {
         console.log('Áp dụng cấu hình:', configString);
         const params = configString.split(';');
@@ -147,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const element = document.getElementById(key);
                 if (element) {
                     element.value = value;
-                    // Nếu là thanh trượt, cập nhật cả giá trị hiển thị
                     if (element.type === 'range') {
                         updateSliderValue(element);
                     }
@@ -157,16 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Đã tải thành công cấu hình từ CyberHud!');
     };
     
-    /**
-     * Lấy giá trị từ các ô input và gửi tới HUD
-     */
     const sendConfig = async () => {
         if (!isConnected) {
             alert('Chưa kết nối với CyberHud!');
             return;
         }
 
-        // Tạo chuỗi cấu hình từ các giá trị trên giao diện
         let configString = 'BKHN';
         configControls.forEach(control => {
             configString += `;${control.id}=${control.value}`;
@@ -188,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- File Transfer --- (Giữ nguyên, không thay đổi)
     const handleFileSelect = () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
